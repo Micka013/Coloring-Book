@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="40" fill="#ffffff" />
+  <path d="M100 150C75 135 40 135 20 150V60C40 45 75 45 100 60C125 45 160 45 180 60V150C160 135 125 135 100 150Z" fill="#ffffff" stroke="#1e293b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100 60V150" stroke="#1e293b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 85C60 80 80 85 90 90" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+  <path d="M40 115C60 110 80 115 90 120" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+  <path d="M160 85C140 80 120 85 110 90" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+  <path d="M160 115C140 110 120 115 110 120" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>
+  <path d="M140 30L145 45L160 50L145 55L140 70L135 55L120 50L135 45L140 30Z" fill="#fde047" stroke="#eab308" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 40L52 48L60 50L52 52L50 60L48 52L40 50L48 48L50 40Z" fill="#fde047" stroke="#eab308" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M80 160L120 120L135 135L95 175L75 180L80 160Z" fill="#bfdbfe" stroke="#1e293b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 120L135 135" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M80 160L95 175" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M75 180L85 165L90 170L75 180Z" fill="#fb7185" stroke="#1e293b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
