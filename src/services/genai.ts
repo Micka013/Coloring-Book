@@ -4,14 +4,21 @@ if (typeof globalThis.fetch === 'undefined') {
   globalThis.fetch = fetch;
 }
 
-const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
-const ai = new GoogleGenAI({ apiKey: apiKey });
+const getApiKey = () => {
+  return import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "";
+};
 
 export async function generateColoringPage(
   theme: string,
   age: string,
   isCover: boolean = false,
 ): Promise<string> {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("Clé API manquante. Veuillez configurer VITE_GEMINI_API_KEY sur Netlify.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
   let agePrompt = "";
   if (age === "3-5") {
     agePrompt =

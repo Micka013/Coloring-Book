@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ColoriKidLogo } from './components/Logo';
 import { Wand2, Download, RefreshCw, BookOpen, Sparkles, Image as ImageIcon, Trash2, Globe, Info, HelpCircle, Library, Settings, Palette, Type, ArrowRight } from 'lucide-react';
 import { generateColoringPage } from './services/genai';
 import { generatePDF } from './services/pdf';
@@ -170,11 +171,9 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-pastel-blue/30 pb-28">
       {/* Header */}
       <header className="bg-white px-6 py-4 shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-pastel-blue flex items-center justify-center text-white shadow-sm">
-            <Wand2 size={22} className="text-blue-600" />
-          </div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Coloriage Magique</h1>
+        <div className="max-w-5xl mx-auto flex items-center gap-3">
+          <ColoriKidLogo size={42} className="drop-shadow-sm" />
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-display">ColoriKid</h1>
         </div>
       </header>
 
@@ -196,7 +195,7 @@ export default function App() {
                   Nouveau : Générateur IA
                 </div>
                 <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                  Crée un livre de coloriage <span className="text-soft-coral">magique</span>
+                  Crée un livre de coloriage <span className="text-soft-coral">magique</span> avec <span className="text-pastel-blue">ColoriKid</span>
                 </h2>
                 <p className="text-lg text-slate-600 mb-10 max-w-lg mx-auto">
                   Personnalisé avec le prénom de l'enfant. Prêt à imprimer en format A4.
@@ -204,7 +203,7 @@ export default function App() {
                 
                 <div className="relative mx-auto w-48 h-64 bg-white rounded-r-2xl rounded-l-md shadow-2xl border-l-8 border-pastel-blue flex flex-col items-center justify-center p-4 transform rotate-3 hover:rotate-0 transition-transform duration-500 mb-10">
                   <div className="absolute inset-0 bg-gradient-to-r from-black/5 to-transparent pointer-events-none rounded-r-2xl"></div>
-                  <Sparkles className="text-pastel-yellow mb-3" size={32} />
+                  <ColoriKidLogo size={48} className="mb-3" />
                   <h3 className="text-center font-display font-bold text-xl leading-tight text-slate-800">Le livre de coloriage de Léa</h3>
                   <p className="text-center text-sm text-slate-500 mt-2 font-medium">Princesses aventurières</p>
                 </div>
@@ -604,7 +603,7 @@ export default function App() {
                     Informations
                   </h3>
                   <div className="space-y-4 text-slate-600">
-                    <p><strong>Coloriage Magique</strong> génère des livres de coloriage uniques grâce à l'intelligence artificielle.</p>
+                    <p><strong>ColoriKid</strong> génère des livres de coloriage uniques grâce à l'intelligence artificielle.</p>
                     <p>Toutes les illustrations sont spécialement conçues pour être imprimées sur du papier A4 avec des traits noirs épais, parfaits pour les enfants.</p>
                   </div>
                 </div>
