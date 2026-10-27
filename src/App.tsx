@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ColoriKidLogo } from './components/Logo';
-import { Wand2, Download, RefreshCw, BookOpen, Sparkles, Image as ImageIcon, Trash2, Globe, Info, HelpCircle, Library, Settings, Palette, Type, ArrowRight } from 'lucide-react';
+import { Wand2, Download, RefreshCw, BookOpen, Sparkles, Image as ImageIcon, Trash2, Globe, Info, HelpCircle, Library, Settings, Palette, Type, ArrowRight, Printer } from 'lucide-react';
 import { generateColoringPage } from './services/genai';
 import { generatePDF } from './services/pdf';
 import { BottomMenu, Tab } from './components/BottomMenu';
 import { saveBook, getBooks, deleteBook, SavedBook } from './services/storage';
+import { HomeHero } from './components/HomeHero';
+import { ThemeExplorer } from './components/ThemeExplorer';
+import { AgeGuide } from './components/AgeGuide';
+import { HowItWorks } from './components/HowItWorks';
+import { ParentBenefits } from './components/ParentBenefits';
+import { FaqSection } from './components/FaqSection';
+import { HomeCta } from './components/HomeCta';
 
 type Step = 'form' | 'loading' | 'preview';
 
@@ -30,10 +37,8 @@ export default function App() {
   const [savedBooks, setSavedBooks] = useState<SavedBook[]>([]);
 
   useEffect(() => {
-    if (activeTab === 'books') {
-      loadSavedBooks();
-    }
-  }, [activeTab]);
+    loadSavedBooks();
+  }, []);
 
   const loadSavedBooks = async () => {
     const books = await getBooks();
@@ -53,28 +58,33 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectTheme = (theme: string) => {
-    setFormData(prev => ({ ...prev, theme }));
+  const handleSelectTheme = (theme: string, age?: string, name?: string) => {
+    setFormData(prev => ({
+      name: name !== undefined && name !== '' ? name : prev.name,
+      age: age || prev.age || '3-5',
+      theme: theme !== undefined ? theme : prev.theme,
+    }));
     setActiveTab('create');
     setStep('form');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.theme) return;
-
+  const startGeneratingBook = async (name: string, age: string, theme: string) => {
+    if (!name || !theme) return;
+    setFormData({ name, age, theme });
+    setActiveTab('create');
     setStep('loading');
-    setLoadingMessage(`Nous créons un livre magique pour ${formData.name}...`);
+    setLoadingMessage(`Nous créons un livre magique pour ${name}...`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
       // Generate cover
-      const cover = await generateColoringPage(formData.theme, formData.age, true);
+      const cover = await generateColoringPage(theme, age, true);
       setLoadingMessage(`Couverture générée ! Création des pages...`);
 
       // Generate 5 pages (in parallel for speed)
       const pagePromises = Array.from({ length: 5 }).map((_, i) => {
-        return generateColoringPage(`${formData.theme}, scene ${i + 1}`, formData.age, false).then(res => {
+        return generateColoringPage(`${theme}, scene ${i + 1}`, age, false).then(res => {
           setLoadingMessage(`Page ${i + 1}/5 générée...`);
           return res;
         });
@@ -89,19 +99,30 @@ export default function App() {
       // Save to storage
       await saveBook({
         id: Date.now().toString(),
-        name: formData.name,
-        theme: formData.theme,
-        age: formData.age,
+        name: name,
+        theme: theme,
+        age: age,
         cover: cover,
         pages: pages,
         createdAt: Date.now()
       });
+      loadSavedBooks();
 
     } catch (error) {
       console.error("Generation failed:", error);
       alert("Une erreur est survenue lors de la génération. Veuillez réessayer.");
       setStep('form');
     }
+  };
+
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.theme) return;
+    startGeneratingBook(formData.name, formData.age, formData.theme);
+  };
+
+  const handleQuickGenerate = (name: string, age: string, theme: string) => {
+    startGeneratingBook(name, age, theme);
   };
 
   const handleRegeneratePage = async (index: number) => {
@@ -170,14 +191,50 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-pastel-blue/30 pb-28">
       {/* Header */}
-      <header className="bg-white px-6 py-4 shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto flex items-center gap-3">
-          <ColoriKidLogo size={42} className="drop-shadow-sm" />
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-display">ColoriKid</h1>
+      <header className="bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3.5 shadow-xs sticky top-0 z-30 border-b border-slate-200/80">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <button 
+            onClick={() => handleTabChange('home')}
+            className="flex items-center gap-3 cursor-pointer text-left group"
+          >
+            <ColoriKidLogo size={42} className="drop-shadow-sm group-hover:scale-105 transition-transform" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight font-display">ColoriKid</h1>
+                <span className="hidden sm:inline-block bg-pastel-yellow/60 border border-amber-300/60 text-amber-900 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full">
+                  Atelier A4
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Livres de coloriage personnalisés</p>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => handleTabChange('books')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <Library size={16} className="text-slate-500" />
+              <span className="hidden sm:inline">Mes livres</span>
+              {savedBooks.length > 0 && (
+                <span className="bg-pastel-blue text-blue-950 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                  {savedBooks.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={handleNewBook}
+              className="bg-soft-coral hover:bg-[#ff7a7a] text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-md shadow-soft-coral/30 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+            >
+              <Sparkles size={16} />
+              <span>Nouveau livre</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:py-10">
         <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div
@@ -186,115 +243,31 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="space-y-16 pb-8"
+              className="space-y-12 sm:space-y-16 pb-8"
             >
-              {/* 1. Hero Section */}
-              <section className="text-center pt-4 pb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pastel-blue/10 text-blue-700 text-sm font-bold mb-6">
-                  <Sparkles size={16} />
-                  Nouveau : Générateur IA
-                </div>
-                <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                  Crée un livre de coloriage <span className="text-soft-coral">magique</span> avec <span className="text-pastel-blue">ColoriKid</span>
-                </h2>
-                <p className="text-lg text-slate-600 mb-10 max-w-lg mx-auto">
-                  Personnalisé avec le prénom de l'enfant. Prêt à imprimer en format A4.
-                </p>
-                
-                <div className="relative mx-auto w-48 h-64 bg-white rounded-r-2xl rounded-l-md shadow-2xl border-l-8 border-pastel-blue flex flex-col items-center justify-center p-4 transform rotate-3 hover:rotate-0 transition-transform duration-500 mb-10">
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/5 to-transparent pointer-events-none rounded-r-2xl"></div>
-                  <ColoriKidLogo size={48} className="mb-3" />
-                  <h3 className="text-center font-display font-bold text-xl leading-tight text-slate-800">Le livre de coloriage de Léa</h3>
-                  <p className="text-center text-sm text-slate-500 mt-2 font-medium">Princesses aventurières</p>
-                </div>
+              {/* 1. Hero with Quick Launcher & Interactive 3D Book Showcase */}
+              <HomeHero
+                onQuickGenerate={handleQuickGenerate}
+                onSelectTheme={handleSelectTheme}
+              />
 
-                <button
-                  onClick={handleNewBook}
-                  className="bg-soft-coral hover:bg-[#ff7a7a] text-white font-bold text-xl px-10 py-4 rounded-2xl shadow-xl shadow-soft-coral/30 transition-all flex items-center gap-3 mx-auto active:scale-[0.98]"
-                >
-                  <Sparkles size={24} />
-                  Créer un livre
-                </button>
-              </section>
+              {/* 2. How it works (Simple 3 steps) */}
+              <HowItWorks onStart={handleNewBook} />
 
-              {/* 2. Comment ça marche */}
-              <section>
-                <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">Comment ça marche ?</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
-                  <div className="hidden sm:block absolute top-8 left-[20%] right-[20%] h-0.5 bg-slate-100 -z-10"></div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-white border-4 border-pastel-yellow/30 text-yellow-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                      <Palette size={28} />
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-lg mb-1">1. Choisis un thème</h4>
-                    <p className="text-slate-500 text-sm">Ce qu'il ou elle adore</p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-white border-4 border-pastel-blue/30 text-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                      <Type size={28} />
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-lg mb-1">2. Entre le prénom</h4>
-                    <p className="text-slate-500 text-sm">Pour un livre 100% unique</p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-white border-4 border-mint-green/40 text-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                      <Download size={28} />
-                    </div>
-                    <h4 className="font-bold text-slate-800 text-lg mb-1">3. Télécharge le PDF</h4>
-                    <p className="text-slate-500 text-sm">Prêt à être imprimé en A4</p>
-                  </div>
-                </div>
-              </section>
+              {/* 3. Thematic Universe Explorer */}
+              <ThemeExplorer onSelectTheme={handleSelectTheme} />
 
-              {/* 3. Adapté à tous les âges */}
-              <section className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                <h3 className="text-2xl font-bold text-center text-slate-800 mb-8">Adapté à tous les âges</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="bg-slate-50 p-5 rounded-2xl text-center border border-slate-100">
-                    <div className="text-4xl mb-3">👶</div>
-                    <h4 className="font-bold text-slate-800 mb-1">3–5 ans</h4>
-                    <p className="text-sm text-slate-500">Formes simples et grandes zones à colorier</p>
-                  </div>
-                  <div className="bg-slate-50 p-5 rounded-2xl text-center border border-slate-100">
-                    <div className="text-4xl mb-3">🧒</div>
-                    <h4 className="font-bold text-slate-800 mb-1">6–8 ans</h4>
-                    <p className="text-sm text-slate-500">Scènes amusantes et détails modérés</p>
-                  </div>
-                  <div className="bg-slate-50 p-5 rounded-2xl text-center border border-slate-100">
-                    <div className="text-4xl mb-3">🧑</div>
-                    <h4 className="font-bold text-slate-800 mb-1">9–12 ans</h4>
-                    <p className="text-sm text-slate-500">Dessins détaillés et décors complets</p>
-                  </div>
-                </div>
-              </section>
+              {/* 4. Age-adapted lines & complexity guide */}
+              <AgeGuide onSelectAge={(age) => handleSelectTheme('', age)} />
 
-              {/* 4. Exemples de thèmes */}
-              <section>
-                <h3 className="text-2xl font-bold text-center text-slate-800 mb-6">Besoin d'inspiration ?</h3>
-                <div className="flex flex-wrap gap-3 justify-center max-w-2xl mx-auto">
-                  {['Dinosaures de l\'espace', 'Princesses aventurières', 'Robots rigolos', 'Animaux fantastiques', 'Super-héros mignons'].map(theme => (
-                    <button
-                      key={theme}
-                      onClick={() => handleSelectTheme(theme)}
-                      className="px-5 py-2.5 bg-white border-2 border-slate-100 rounded-full text-slate-600 font-bold hover:border-pastel-blue hover:text-blue-600 hover:shadow-md transition-all active:scale-95"
-                    >
-                      {theme}
-                    </button>
-                  ))}
-                </div>
-              </section>
+              {/* 5. Reassurance & Parent Benefits */}
+              <ParentBenefits />
 
-              {/* 5. Call-to-action final */}
-              <section className="bg-pastel-blue/10 rounded-3xl p-8 text-center">
-                <h3 className="text-2xl font-bold text-slate-800 mb-3">Prêt à faire un heureux ?</h3>
-                <p className="text-slate-600 mb-6">Crée un livre unique pour un enfant dès maintenant.</p>
-                <button
-                  onClick={handleNewBook}
-                  className="bg-pastel-blue hover:bg-[#96cfff] text-blue-900 font-bold text-lg px-8 py-3 rounded-xl shadow-lg shadow-pastel-blue/30 transition-all inline-flex items-center gap-2 active:scale-95"
-                >
-                  Commencer <ArrowRight size={20} />
-                </button>
-              </section>
+              {/* 6. FAQ */}
+              <FaqSection />
+
+              {/* 7. Final Call-to-action */}
+              <HomeCta onStart={handleNewBook} />
             </motion.div>
           )}
 
